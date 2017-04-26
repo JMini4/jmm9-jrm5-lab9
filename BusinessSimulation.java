@@ -5,20 +5,20 @@ import structure5.*;
 public abstract class BusinessSimulation {
 
 	/* sequence of customers, prioritized by randomly-generated event time */
-	PriorityQueue<Customer> eventQueue;
+	protected static PriorityQueue<Customer> eventQueue;
 
 	/* series of service points where customers queue and are served */
-	Vector<Queue<Customer>> servicePoints;
+	protected Vector<Queue<Customer>> servicePoints;
 
 	/* current time step in the simulation */
-	int time;
+	protected int time;
 
 	/* seed for Random() so that simulation is repeatable */
-	int seed;
+	protected int seed;
 
 	/* Used to bound the range of service times that Customers require */
-	static final int MIN_SERVICE_TIME = 5; //TODO: set appropraitely
-	static final int MAX_SERVICE_TIME = 20; //TODO: set appropriately
+	protected static final int MIN_SERVICE_TIME = 5; //TODO: set appropraitely
+	protected static final int MAX_SERVICE_TIME = 20; //TODO: set appropriately
 
 	/**
 	 * Creates a BusinessSimulation.
@@ -34,9 +34,10 @@ public abstract class BusinessSimulation {
 	    this.seed = seed;
 	    time = 0;
 	    generateCustomerSequence(numCustomers, maxEventStart, seed);
-
-	    //when a teller is free, remove the head of the queue as long as their arrival time is <= current time
-	    
+	    servicePoints = new Vector<Queue<Customer> >(numServicePoints);
+	    for(int i = 0; i < numServicePoints; i++){
+		servicePoints.add(new QueueVector<Customer>());
+	    }
 	}
 
 	/**
@@ -52,7 +53,7 @@ public abstract class BusinessSimulation {
 	public static PriorityQueue<Customer> generateCustomerSequence(int numCustomers,
 								       int maxEventStart,
 								       int seed) {
-	    eventQueue = new PriorityVector();
+	    eventQueue = new PriorityVector<Customer>();
 	    Random arrivalTimeGenerator = new Random();
 	    Random serviceTimeGenerator = new Random();
 
@@ -68,21 +69,23 @@ public abstract class BusinessSimulation {
 	 * @post the simulation has advanced @timeSteps time steps
 	 * @return true if the simulation is over, false otherwise
 	 */
-    abstract public boolean step(int timeSteps){
-	time = time + timeSteps;
-	return eventQueue.isEmpty(); //add that all the customers are being served
-	
-    };
 
+    public boolean step(int timeSteps){
+	for(int i = 0; i < timeSteps; i++){
+	    return this.step();
+	}
+	return this.isFinished();
+    }
+    
 	/**
 	 * Advances 1 time step through the simulation.
 	 *
 	 * @post the simulation has advanced 1 time step
 	 * @return true if the simulation is over, false otherwise
 	 */
-    abstract public boolean step(){
+    public boolean step(){
 	time++;
-	return eventQueue.isEmpty(); //add that all the customers are being served  
+	return this.isFinished();
     }
     
 	/**
@@ -105,4 +108,13 @@ public abstract class BusinessSimulation {
 
 		return str;
 	}
+
+    public boolean isFinished(){
+	for(int i = 0; i < servicePoints.size(); i++){
+	    if(!servicePoints.get(i).isEmpty()){
+		return false;
+	    }
+	}
+	return eventQueue.isEmpty();
+    }
 }
