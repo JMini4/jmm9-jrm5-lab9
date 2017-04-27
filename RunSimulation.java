@@ -24,6 +24,8 @@ public class RunSimulation {
 	}
      
 	while(!simulator.isFinished()){
+	    simulator.goToTeller(simulator.getFirstCustomer());
+	    simulator.manageTeller(simulator.getFirstCustomer());
 	    simulator.step();
 	    
 	}

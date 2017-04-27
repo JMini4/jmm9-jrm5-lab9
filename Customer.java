@@ -1,4 +1,5 @@
 
+
 import structure5.*;
 
 public class Customer implements Comparable<Customer> {
@@ -41,6 +42,9 @@ public class Customer implements Comparable<Customer> {
 	return serviceTime;
     }
 
+    public void decrementServiceTime(){
+	serviceTime = serviceTime - 1;
+    }
     public void setTellerTime(int time){
 	toTellerTime = time;
     }

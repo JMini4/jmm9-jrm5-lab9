@@ -117,4 +117,23 @@ public abstract class BusinessSimulation {
 	}
 	return eventQueue.isEmpty();
     }
+
+    public Customer getFirstCustomer(){
+	return eventQueue.getFirst();
+    }
+    
+    abstract void goToTeller(Customer nextCustomer);
+
+    public void manageTeller(Customer currentCustomer){
+	for(int i = 0; i < servicePoints.size(); i++){
+	    if(currentCustomer.getServiceTime()== 0){
+		servicePoints.get(i).remove(currentCustomer);
+		System.out.println(currentCustomer.getWaitTime());
+	    } else {
+		servicePoints.get(i).get().decrementServiceTime();
+	    }
+	}
+    }
+    
 }
+
