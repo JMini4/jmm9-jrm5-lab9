@@ -24,10 +24,13 @@ public class RunSimulation {
 	}
      
 	while(!simulator.isFinished()){
-	    simulator.goToTeller(simulator.getFirstCustomer());
-	    simulator.manageTeller(simulator.getFirstCustomer());
+	    simulator.goToTeller();
+	    simulator.manageTeller();
+	    //System.out.println(simulator.toString());
 	    simulator.step();
 	    
 	}
+	System.out.println(simulator.averageWaitTime());
+	System.out.println(simulator.totalWaitTime);
     }
 }

@@ -1,3 +1,23 @@
+/*
+Josie Maynard and Julia Mini
+Jon's lab
+4/27/17
+
+Thought Questions:
+
+1. In cases where the maximum service time is short, there is not much of a difference in the time it takes to process all of the customers between the two queue strategies. Whether many customers showed up at once or many customers showed up over a longer period of time, the total time was approximately the same. However when the maximum service time grew, it became clear that the single line strategy was faster at processing all of the customers than the multiple line strategy. For example, when the parameters were (numCustomers=60, numServicePoints=3, maxEventStart=6, minServiceTime= 5, maxServiceTime=20), which indicated many customers arriving in a short period of time with a moderate maximum service time, it took the multiple line strategy 279 steps, and the single line strategy 271. Thus the single line strategy was faster, but not by much. However, when we used the same parameters, but set maxServiceTime to 30, it took the multiple line strategy 400 time steps, and the single line strategy 379. Furthermore, when we increased maxServiceTime to 50, it took the multiple line strategy 667 time steps and single line strategy 583 time steps. Therefore, the greater the average service time, the bigger difference there is between the time it takes to process all of the customers for the two line strategies, and overall the single line simulation takes less than or equal to the amount of time taken by the multiple line simulation.
+
+2. For every scenario we tried, we found that there was an equal average wait time for customers for the two different line techniques. 
+FINISH AND WRITE DOWN PARAMETERS
+
+3.
+
+4.
+
+Program Description:
+
+ */
+
 import java.util.Vector;
 import java.util.Random;
 import structure5.*;
@@ -11,14 +31,18 @@ public abstract class BusinessSimulation {
 	protected Vector<Queue<Customer>> servicePoints;
 
 	/* current time step in the simulation */
-	protected int time;
+	public int time;
 
 	/* seed for Random() so that simulation is repeatable */
 	protected int seed;
 
+    protected int numCustomers;
+    
+    public int totalWaitTime;
+    
 	/* Used to bound the range of service times that Customers require */
-	protected static final int MIN_SERVICE_TIME = 5; //TODO: set appropraitely
-	protected static final int MAX_SERVICE_TIME = 20; //TODO: set appropriately
+	protected static final int MIN_SERVICE_TIME = 40; //TODO: set appropraitely
+	protected static final int MAX_SERVICE_TIME = 50; //TODO: set appropriately
 
 	/**
 	 * Creates a BusinessSimulation.
@@ -31,7 +55,9 @@ public abstract class BusinessSimulation {
 	 */
 	public BusinessSimulation(int numCustomers, int numServicePoints,
 				  int maxEventStart, int seed) {
+	    this.numCustomers = numCustomers;
 	    this.seed = seed;
+	    totalWaitTime = 0;
 	    time = 0;
 	    generateCustomerSequence(numCustomers, maxEventStart, seed);
 	    servicePoints = new Vector<Queue<Customer> >(numServicePoints);
@@ -54,11 +80,11 @@ public abstract class BusinessSimulation {
 								       int maxEventStart,
 								       int seed) {
 	    eventQueue = new PriorityVector<Customer>();
-	    Random arrivalTimeGenerator = new Random();
-	    Random serviceTimeGenerator = new Random();
+	    Random arrivalTimeGenerator = new Random(seed);
+	    Random serviceTimeGenerator = new Random(seed);
 
 	    for(int i = 0; i < numCustomers; i++){
-		eventQueue.add(new Customer(arrivalTimeGenerator.nextInt(maxEventStart), serviceTimeGenerator.nextInt(MAX_SERVICE_TIME-MIN_SERVICE_TIME) + MIN_SERVICE_TIME));
+		eventQueue.add(new Customer(arrivalTimeGenerator.nextInt(maxEventStart), (serviceTimeGenerator.nextInt(MAX_SERVICE_TIME-MIN_SERVICE_TIME) + MIN_SERVICE_TIME)));
 	    }
 	    return eventQueue;
 	}
@@ -84,7 +110,7 @@ public abstract class BusinessSimulation {
 	 * @return true if the simulation is over, false otherwise
 	 */
     public boolean step(){
-	time++;
+	time = time + 1;
 	return this.isFinished();
     }
     
@@ -122,17 +148,26 @@ public abstract class BusinessSimulation {
 	return eventQueue.getFirst();
     }
     
-    abstract void goToTeller(Customer nextCustomer);
+    abstract void goToTeller();
 
-    public void manageTeller(Customer currentCustomer){
+    public void manageTeller(){
 	for(int i = 0; i < servicePoints.size(); i++){
-	    if(currentCustomer.getServiceTime()== 0){
-		servicePoints.get(i).remove(currentCustomer);
-		System.out.println(currentCustomer.getWaitTime());
-	    } else {
-		servicePoints.get(i).get().decrementServiceTime();
+	    Customer currentCustomer = servicePoints.get(i).get();
+
+	    if(currentCustomer != null){
+		if(currentCustomer.getServiceTime()== 0){
+		    currentCustomer.setEndTime(time);
+		    totalWaitTime = totalWaitTime + currentCustomer.getWaitTime();
+		    servicePoints.get(i).remove();
+		} else {
+		    currentCustomer.decrementServiceTime();
+		}
 	    }
 	}
+    }
+
+    public int averageWaitTime(){
+	return totalWaitTime/numCustomers;
     }
     
 }

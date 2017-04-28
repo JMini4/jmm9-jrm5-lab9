@@ -6,24 +6,26 @@ public class SingleLineSimulation extends BusinessSimulation {
 				  int maxEventStart, int seed) {
 	super(numCustomers, numServicePoints, maxEventStart, seed);
     }
+    
+    public void goToTeller(){
 
-    public void goToTeller(Customer nextCustomer){
-	if(nextCustomer.getArrivalTime() >= time){
-	    for(int i = 0; i < servicePoints.size(); i++){
+	Customer nextCustomer = eventQueue.getFirst();
+	int i;
+	
+	while(nextCustomer != null && nextCustomer.getArrivalTime() <= time){
+	    for(i = 0; i < servicePoints.size(); i++){
 		if(servicePoints.get(i).isEmpty()){
 		    eventQueue.remove();
 		    servicePoints.get(i).add(nextCustomer);
-		    nextCustomer.setTellerTime(time);
-
-		    if(eventQueue.getFirst().getArrivalTime() >= time){
-			goToTeller(eventQueue.getFirst());
-		    }
-		    
 		    break;
 		}
+	    }
+	    if(i == servicePoints.size()){
+		return;
+	    } else{
+		nextCustomer = eventQueue.getFirst();	
 	    }
 	}
     }
     
-
 }

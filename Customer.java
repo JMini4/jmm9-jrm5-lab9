@@ -9,7 +9,8 @@ public class Customer implements Comparable<Customer> {
 
     public int arrivalTime; //public or private?
     private int serviceTime;
-    private int toTellerTime;
+    private int endTime;
+    private int originalServiceTime;
     
 	/**
 	 * Creates a Customer that arrives at time step @eventTime and
@@ -19,7 +20,8 @@ public class Customer implements Comparable<Customer> {
     public Customer(int eventTime, int serviceTime) {
 	arrivalTime = eventTime;
 	this.serviceTime = serviceTime;
-	toTellerTime = 0;
+	originalServiceTime = serviceTime;
+	endTime = 0;
     }
 
 	/**
@@ -42,13 +44,21 @@ public class Customer implements Comparable<Customer> {
 	return serviceTime;
     }
 
+    public int getOriginalServiceTime(){
+	return originalServiceTime;
+    }
+
     public void decrementServiceTime(){
 	serviceTime = serviceTime - 1;
     }
-    public void setTellerTime(int time){
-	toTellerTime = time;
+    public void setEndTime(int time){
+	endTime = time;
+    }
+
+    public int getEndTime(){
+	return endTime;
     }
     public int getWaitTime(){
-	return toTellerTime - arrivalTime;
+	return endTime - originalServiceTime - arrivalTime;
     }
 }
