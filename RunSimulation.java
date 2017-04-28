@@ -1,6 +1,14 @@
+/*
+Names: Josie Maynard and Julia Mini
+Lab Section: Jon's Lab
+Lab 9 - Business Simulation
+ */
+
+
 import structure5.*;
 import java.util.Scanner;
 
+// Class that runs the given simulation from a user input by asking for the numCustomers, numServicePoints, maxStart,  and seed
 public class RunSimulation {
     public static void main(String args[]){
 	int simulationType;
@@ -14,11 +22,11 @@ public class RunSimulation {
 	int maxStart = in.nextInt();
 	int seed = in.nextInt();
 	
-	if(args[0].equals("single")){
+	if(args[0].equals("single")){ // run Single Line Simulation
 	    simulator = new SingleLineSimulation(numCustomers, numServicePoints, maxStart, seed);
-	} else if (args[0].equals("multiple")){
+	} else if (args[0].equals("multiple")){ // run Multiple Line Simulation
 	    simulator = new MultipleLineSimulation(numCustomers, numServicePoints, maxStart, seed);
-	} else {
+	} else { // tried to enter something other than single or multiple
 	    System.out.println("First select single or multiple line simulation");
 	    return;
 	}

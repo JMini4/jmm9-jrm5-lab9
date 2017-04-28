@@ -4,9 +4,6 @@ import structure5.*;
 
 public class Customer implements Comparable<Customer> {
 
-	// TODO: fill this class in, adding member variables and
-	// methods as needed
-
     public int arrivalTime; //public or private?
     private int serviceTime;
     private int endTime;
@@ -17,6 +14,7 @@ public class Customer implements Comparable<Customer> {
 	 * requires @serviceTime time steps to be satisfied after
 	 * arriving at a service point.
 	 */
+    // post: creates a customer that arrives at eventTime and takes serviceTime for teller to process 
     public Customer(int eventTime, int serviceTime) {
 	arrivalTime = eventTime;
 	this.serviceTime = serviceTime;
@@ -27,6 +25,7 @@ public class Customer implements Comparable<Customer> {
 	/**
 	 * Compares Customers by arrival time
 	 */
+    // post: compares customers by arrival times
     public int compareTo(Customer other) {
 	return arrivalTime - other.arrivalTime;
     }
@@ -45,7 +44,7 @@ public class Customer implements Comparable<Customer> {
     }
 
     public int getOriginalServiceTime(){
-	return originalServiceTime;
+	return originalServiceTime; //before customer reaches teller, before decremented
     }
 
     public void decrementServiceTime(){
