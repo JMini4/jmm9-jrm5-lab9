@@ -23,42 +23,35 @@ import structure5.*;
 
 public abstract class BusinessSimulation {
 
-    /* sequence of customers, prioritized by randomly-generated event time */
+    // sequence of customers, prioritized by randomly-generated event time
     protected static PriorityQueue<Customer> eventQueue;
     
-    /* series of service points where customers queue and are served */
+    // series of service points where customers queue and are served 
     protected Vector<Queue<Customer>> servicePoints;
     
-    /* current time step in the simulation */
-    public int time;
+    // current time step in the simulation 
+    public int time = 0; // i removed this from the business simulation method and set it to zero here instead
 
-    /* seed for Random() so that simulation is repeatable */
+    // seed for Random() so that simulation is repeatable 
     protected int seed;
 
     protected int numCustomers;
     
-    public int totalWaitTime; // for every customer combined
+    // combined wait time for every customer (for testing average wait)
+    public int totalWaitTime = 0; 
     
-    /* Used to bound the range of service times that Customers require */
+    // Used to bound the range of service times that Customers require
     protected static final int MIN_SERVICE_TIME = 40; 
     protected static final int MAX_SERVICE_TIME = 50; 
 
-    /**
-     * Creates a BusinessSimulation.
-     * @post the step() function may be called.
-     *
-     * @numCustomers number of random customers that appear in the simulation
-     * @numSerivicePoints number of tellers in this simulation
-     * @maxEventStart latest timeStep that a Customer may appear in the simulation
-     * @seed used to seed a Random() so that simulation is repeatable.
-     */
+    /* post: creates a business simulation by taking the number of customers, number of service points, the latest time a customer
+     may arrive. A queue is created at each service point, and the seed is so that the simulation is repeatable. 
+    */
     public BusinessSimulation(int numCustomers, int numServicePoints,
 			      int maxEventStart, int seed) {
 	this.numCustomers = numCustomers;
 	this.seed = seed;
-	totalWaitTime = 0;
-	time = 0;
-	generateCustomerSequence(numCustomers, maxEventStart, seed);
+       	generateCustomerSequence(numCustomers, maxEventStart, seed);
 	// creates a vector of queues for every teller
 	servicePoints = new Vector<Queue<Customer> >(numServicePoints);
 	for(int i = 0; i < numServicePoints; i++){
@@ -66,16 +59,8 @@ public abstract class BusinessSimulation {
 	}
     }
     
-    /**
-     * Generates a sequence of Customer objects, stored in a PriorityQueue.
-     * Customer priority is determined by arrival time
-     * @arg numCustomers number of customers to simulate
-     * @arg maxEventStart maximum timeStep that a customer arrives
-     *      in @eventQueue
-     * @arg seed use Random(seed) to make customer sequence repeatable
-     * @return A PriorityQueue that represents Customer arrivals,
-     *         ordered by Customer arrival time
-     */
+   
+    // post: creates the eventQueue of customer objects with randomly generated arrival and service times and orders the queue by arrival time
     public static PriorityQueue<Customer> generateCustomerSequence(int numCustomers,
 								   int maxEventStart,
 								   int seed) {
@@ -90,12 +75,6 @@ public abstract class BusinessSimulation {
 	return eventQueue;
     }
 
-    /**
-     * Advances @timeSteps time steps through the simulation.
-     *
-     * @post the simulation has advanced @timeSteps time steps
-     * @return true if the simulation is over, false otherwise
-     */
 
     // post: the simulation has advanced time steps @timeSteps and returns true if simulation is over
     public boolean step(int timeSteps){
@@ -105,21 +84,15 @@ public abstract class BusinessSimulation {
 	return this.isFinished();
     }
     
-    /**
-     * Advances 1 time step through the simulation.
-     *
-     * @post the simulation has advanced 1 time step
-     * @return true if the simulation is over, false otherwise
-     */
+    
     // post: increments time steps and returns true if simulation is over
     public boolean step(){
 	time = time + 1;
 	return this.isFinished();
     }
     
-    /**
-     * @return a string representation of the simulation
-     */
+    
+    // post: returns a string representation of the simulation
     public String toString() {
 	String str = "Time: " + time + "\n";
 	str = str + "Event Queue: ";
@@ -137,6 +110,7 @@ public abstract class BusinessSimulation {
 	return str;
     }
     
+    // post: returns true if all of the tellers are done processing customers
     public boolean isFinished(){
 	for(int i = 0; i < servicePoints.size(); i++){
 	    if(!servicePoints.get(i).isEmpty()){ // at least one teller is still busy
@@ -146,16 +120,19 @@ public abstract class BusinessSimulation {
 	return eventQueue.isEmpty();
     }
 
+    // post: returns the first customer in the event queue 
     public Customer getFirstCustomer(){
 	return eventQueue.getFirst();
     }
     
+    // post: abstract method that moves a customer to the appropriate teller
     abstract void goToTeller();
 
-    // post: 
+    // post: decrements the service time of the customer at the teller for each time step
+    // when service time is zero the teller is done processing the customer and removes them from the teller line
     public void manageTeller(){
 	for(int i = 0; i < servicePoints.size(); i++){
-	    Customer currentCustomer = servicePoints.get(i).get(); // current customer is the first in line at a teller 
+	    Customer currentCustomer = servicePoints.get(i).get();
 	                                                          
 	    if(currentCustomer != null){ //should this be a while loop?
 		if(currentCustomer.getServiceTime()== 0){
@@ -169,6 +146,7 @@ public abstract class BusinessSimulation {
 	}
     }
     
+    // post: returns the average wait time for the simulation (used in testing)
     public int averageWaitTime(){
 	return totalWaitTime / numCustomers;
     }
