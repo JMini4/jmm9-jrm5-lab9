@@ -1,7 +1,5 @@
 /*                                                                                                                                                                      
-Josie Maynard and Julia Mini                                                                                                                                           
-Jon's lab                                                                                                                                                             
-4/27/17   
+Josie Maynard and Julia Mini                                                                                                                    Jon's lab                                                                                                                                       4/27/17   
 
 Program Description: Creates a customer object that has a random arrival time and service time. Customers are ordered based on their arrival time. The times associated with each customer, like arrival time and wait time can be accessed.
 */
@@ -18,6 +16,7 @@ public class Customer implements Comparable<Customer> {
     private int endTime = 0;
 
     //to remember the service time the customer started with before decrementation
+    // used for thought question
     private int originalServiceTime;
     
     // pre: eventTime and serviceTime are greater than or equal to 0    
@@ -57,11 +56,13 @@ public class Customer implements Comparable<Customer> {
     }
 
     // post: records when the customer is done being served
+    // used for thought questions
     public void setEndTime(int time){
 	endTime = time;
     }
 
     // post: returns the wait time for a customer
+    // used for thought questions
     public int getWaitTime(){
 	return endTime - originalServiceTime - arrivalTime;
     }

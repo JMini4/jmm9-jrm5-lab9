@@ -13,7 +13,7 @@ Thought Questions:
 
 4. For the multiple line simulation, if lines were dedicated to serving customers of varying lengths of service times, it would improve the average wait time for a customer because customers with long service times would no longer hold up customers with short service times. This would give customers with short service times much shorter wait times. This would bring the average wait time down. For the single line simulation, if tellers could only serve customers with their designated wait times, this would not increase the efficiency. The way it is now, customers with short service times do not get stuck behind customers with long service times because they can go to the next available teller instead of committing to one when they arrive (this was why the single line simulation was faster than the multiple line simulation when the maximum service time was large). 
 
-Program Description: 
+Program Description: an abstract class which contains a general business simulation which contains the properties that the single and multiple line simulations have in common. Contains a queue of customers with random arrival and service times and manages how each customer is processed once they have arrived at the service point. It is able to increment the time step and can check when the simulation is finished.
 
  */
 
@@ -30,7 +30,7 @@ public abstract class BusinessSimulation {
     protected Vector<Queue<Customer>> servicePoints;
     
     // current time step in the simulation 
-    public int time = 0; // i removed this from the business simulation method and set it to zero here instead
+    protected int time = 0;
 
     // seed for Random() so that simulation is repeatable 
     protected int seed;
@@ -38,20 +38,24 @@ public abstract class BusinessSimulation {
     protected int numCustomers;
     
     // combined wait time for every customer (for testing average wait)
-    public int totalWaitTime = 0; 
+    protected int totalWaitTime = 0; 
     
     // Used to bound the range of service times that Customers require
-    protected static final int MIN_SERVICE_TIME = 40; 
-    protected static final int MAX_SERVICE_TIME = 50; 
+    protected static final int MIN_SERVICE_TIME = 5; 
+    protected static final int MAX_SERVICE_TIME = 20; 
 
-    /* post: creates a business simulation by taking the number of customers, number of service points, the latest time a customer
-     may arrive. A queue is created at each service point, and the seed is so that the simulation is repeatable. 
-    */
+    // pre: numCustomers, numServicePoints, maxEventStart, and seed are all positive
+    // post: creates a business simulation by taking the number of customers, number of service points, the latest time a customer
+    // may arrive, and the seed.
     public BusinessSimulation(int numCustomers, int numServicePoints,
 			      int maxEventStart, int seed) {
+	assert(numCustomers >= 0 && numServicePoints > 0 && maxEventStart >= 0 && seed > 0):("All parameters must be positive");
+	
 	this.numCustomers = numCustomers;
 	this.seed = seed;
-       	generateCustomerSequence(numCustomers, maxEventStart, seed);
+
+	generateCustomerSequence(numCustomers, maxEventStart, seed);
+
 	// creates a vector of queues for every teller
 	servicePoints = new Vector<Queue<Customer> >(numServicePoints);
 	for(int i = 0; i < numServicePoints; i++){
@@ -59,25 +63,32 @@ public abstract class BusinessSimulation {
 	}
     }
     
-   
-    // post: creates the eventQueue of customer objects with randomly generated arrival and service times and orders the queue by arrival time
+    // pre: numCustomers, maxEventStart, and seed are all positive 
+    // post: creates the eventQueue of customers with randomly generated arrival and service times
+    // orders the queue by arrival time
     public static PriorityQueue<Customer> generateCustomerSequence(int numCustomers,
 								   int maxEventStart,
 								   int seed) {
+	assert(numCustomers >= 0 && maxEventStart >= 0 && seed > 0):("All parameters must be positive");
+
 	eventQueue = new PriorityVector<Customer>();
+	
 	Random arrivalTimeGenerator = new Random(seed);
 	Random serviceTimeGenerator = new Random(seed);
 
-	// randomly generates arrival time and service time and assigns them to a customer object
+	// assigns the arrival time and service time to a customer and adds them to the queue
 	for(int i = 0; i < numCustomers; i++){
-	    eventQueue.add(new Customer(arrivalTimeGenerator.nextInt(maxEventStart), (serviceTimeGenerator.nextInt(MAX_SERVICE_TIME-MIN_SERVICE_TIME) + MIN_SERVICE_TIME)));
+	    eventQueue.add(new Customer(arrivalTimeGenerator.nextInt(maxEventStart + 1),
+					(serviceTimeGenerator.nextInt(MAX_SERVICE_TIME - MIN_SERVICE_TIME + 1) + MIN_SERVICE_TIME)));
 	}
 	return eventQueue;
     }
 
-
+    // pre: timeSteps is positive
     // post: the simulation has advanced time steps @timeSteps and returns true if simulation is over
     public boolean step(int timeSteps){
+	assert(timeSteps > 0):("Time steps must be positive");
+
 	for(int i = 0; i < timeSteps; i++){
 	    return this.step();
 	}
@@ -106,50 +117,47 @@ public abstract class BusinessSimulation {
 		str = str + "Service Point: " + sp.toString() + "\n";
 	    }
 	}
-	
 	return str;
     }
     
-    // post: returns true if all of the tellers are done processing customers
+    // post: returns true if all of the servers are done processing customers
     public boolean isFinished(){
 	for(int i = 0; i < servicePoints.size(); i++){
-	    if(!servicePoints.get(i).isEmpty()){ // at least one teller is still busy
+	    if(!servicePoints.get(i).isEmpty()){ // at least one server is still busy
 		return false;
 	    }
 	}
 	return eventQueue.isEmpty();
     }
-
-    // post: returns the first customer in the event queue 
-    public Customer getFirstCustomer(){
-	return eventQueue.getFirst();
-    }
     
-    // post: abstract method that moves a customer to the appropriate teller
+    // post: abstract method that moves a customer to the appropriate server
     abstract void goToTeller();
 
-    // post: decrements the service time of the customer at the teller for each time step
-    // when service time is zero the teller is done processing the customer and removes them from the teller line
+    // post: decrements the service time of the customer at the teller
+    // when service time is zero the server is done processing the customer and removes them from the server line
     public void manageTeller(){
 	for(int i = 0; i < servicePoints.size(); i++){
 	    Customer currentCustomer = servicePoints.get(i).get();
 	                                                          
-	    if(currentCustomer != null){ //should this be a while loop?
-		if(currentCustomer.getServiceTime()== 0){
-		    currentCustomer.setEndTime(time); // then they are done
-		    totalWaitTime = totalWaitTime + currentCustomer.getWaitTime(); // add individual wait time to total
-		    servicePoints.get(i).remove(); // leave teller
-		} else {
-		    currentCustomer.decrementServiceTime(); // then they are not done yet
+	    if(currentCustomer != null){ 
+		if(currentCustomer.getServiceTime()== 0){ // they are done, leave server
+
+		    //used for average wait time thought question
+		    currentCustomer.setEndTime(time); 
+		    totalWaitTime = totalWaitTime + currentCustomer.getWaitTime(); 
+
+		    servicePoints.get(i).remove();
+		    
+		} else { // they are not done yet
+		    currentCustomer.decrementServiceTime(); 
 		}
 	    }
 	}
     }
     
-    // post: returns the average wait time for the simulation (used in testing)
+    // post: returns the average wait time for the simulation (used for thought questions)
     public int averageWaitTime(){
 	return totalWaitTime / numCustomers;
     }
-    
 }
 
